@@ -1,3 +1,4 @@
+![Home Page](images/pdfbatch-phase1.png)
 > Transform your CSV data into personalized PDF documents - all in your browser, completely private.
 
 [![React](https://img.shields.io/badge/React-18.3-blue.svg)](https://reactjs.org/)
