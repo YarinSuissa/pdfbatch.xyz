@@ -1,6 +1,5 @@
+Transform your CSV data into personalized PDF documents - all in your browser, completely private.
 ![Home Page](images/pdfbatch-phase1.png)
-> Transform your CSV data into personalized PDF documents - all in your browser, completely private.
-
 [![React](https://img.shields.io/badge/React-18.3-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg)](https://vitejs.dev/)
@@ -32,7 +31,7 @@ Simply go to [https://pdfbatch.xyz](https://pdfbatch.xyz) - no installation requ
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pdfbatch.xyz.git
+git clone https://github.com/YarinSuissa/pdfbatch.xyz.git
 cd pdfbatch.xyz
 
 # Install dependencies
@@ -93,26 +92,6 @@ Uses browser localStorage and cookies to save job progress, allowing users to re
 #### File Verification
 SHA-256 checksums ensure file integrity when resuming jobs.
 
-## 📁 Project Structure
-
-```
-src/
-├── components/
-│   ├── steps/          # Wizard step components
-│   │   ├── UploadStep.tsx
-│   │   ├── MappingStep.tsx
-│   │   ├── NamingStep.tsx
-│   │   └── GenerateStep.tsx
-│   └── ui/             # Reusable UI components
-├── utils/
-│   ├── pdfUtils.ts     # PDF processing functions
-│   ├── csvUtils.ts     # CSV parsing utilities
-│   ├── namingUtils.ts  # File naming logic
-│   └── jobStorage.ts   # Job persistence
-├── types/              # TypeScript type definitions
-└── App.tsx            # Main application component
-```
-
 ## 🔧 Configuration
 
 ### File Limits
@@ -165,12 +144,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - For very large batches (>1000 PDFs), process in smaller chunks
 - Close other browser tabs to free up memory
 
-## 💖 Support
-
-If you find this tool useful, consider supporting the development:
-
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M11I0T5G)
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -181,26 +154,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Special thanks to the open-source community for the amazing libraries
 - Inspired by the need for privacy-conscious document automation
 
+## 💖 Support
+
+If you find this tool useful, consider supporting the development:
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M11I0T5G)
+
 ---
 
 **Made with ❤️ for people who value their privacy and time**
 
 *No cookies (except for job persistence), no tracking, no nonsense - just PDF generation that works.*
-</artifact>
-</artifacts>
-
-I've created a comprehensive README that covers all aspects of your PDFBatch.xyz application. The README includes:
-
-1. **Clear project description** - Explains what it does and its privacy-first approach
-2. **Feature highlights** - All major capabilities listed with emojis for visual appeal
-3. **Quick start guide** - Both for using the live app and running locally
-4. **Step-by-step usage instructions** - Matching your 4-step wizard interface
-5. **Technical details** - Stack, architecture, and implementation notes
-6. **Project structure** - Helps new contributors understand the codebase
-7. **Use cases** - Real-world applications to help users understand the value
-8. **Troubleshooting** - Common issues and solutions
-9. **Support section** - Including your Ko-fi link for donations
-
-The README emphasizes the privacy-focused, client-side nature of your app, which is a key differentiator. It's written in a friendly, accessible tone while still providing technical depth for developers who might want to contribute or understand how it works.
-
-Feel free to adjust any sections, add screenshots, or modify the badges and links to match your actual repository details!
