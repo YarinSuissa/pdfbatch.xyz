@@ -20,6 +20,7 @@ import {
   saveIncompleteJob, 
   StoredJobData 
 } from './utils/jobStorage'
+import { createFileWithChecksum } from './utils/checksumUtils'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 function App() {
@@ -55,29 +56,36 @@ function App() {
   // Save job data whenever it changes (after step 1)
   useEffect(() => {
     if (pdfFile?.valid && csvFile?.valid && pdfFields.length > 0) {
-      const jobData: StoredJobData = {
-        jobId: `session-${Date.now()}`,
-        pdfFile: {
-          name: pdfFile.file.name,
-          size: pdfFile.file.size,
-          lastModified: pdfFile.file.lastModified,
-          preview: pdfFile.preview,
-          metadata: pdfFile.metadata
-        },
-        csvFile: {
-          name: csvFile.file.name,
-          size: csvFile.file.size,
-          lastModified: csvFile.file.lastModified,
-          metadata: csvFile.metadata
-        },
-        pdfFields,
-        csvData,
-        fieldMappings,
-        namingTemplate: namingTemplate || { template: '', placeholders: [], preview: [] },
-        timestamp: Date.now()
+      const saveJobData = async () => {
+        try {
+          const pdfWithChecksum = await createFileWithChecksum(pdfFile.file)
+          const csvWithChecksum = await createFileWithChecksum(csvFile.file)
+          
+          const jobData: StoredJobData = {
+            jobId: `session-${Date.now()}`,
+            pdfFile: {
+              ...pdfWithChecksum,
+              preview: pdfFile.preview,
+              metadata: pdfFile.metadata
+            },
+            csvFile: {
+              ...csvWithChecksum,
+              metadata: csvFile.metadata
+            },
+            pdfFields,
+            csvData,
+            fieldMappings,
+            namingTemplate: namingTemplate || { template: '', placeholders: [], preview: [] },
+            timestamp: Date.now()
+          }
+          
+          saveIncompleteJob(jobData)
+        } catch (error) {
+          console.error('Failed to save job data:', error)
+        }
       }
       
-      saveIncompleteJob(jobData)
+      saveJobData()
     }
   }, [pdfFile, csvFile, pdfFields, csvData, fieldMappings, namingTemplate])
 
@@ -146,40 +154,24 @@ function App() {
     clearIncompleteJob()
   }
 
-  const handleResumeJob = () => {
+  const handleResumeJob = (
+    pdfFile: UploadedFile,
+    csvFile: UploadedFile,
+    pdfFields: PDFField[],
+    csvData: { columns: CSVColumn[], data: Record<string, string>[] }
+  ) => {
     if (!incompleteJobData) return
     
-    // Restore all the data from the incomplete job
-    const restoredPdfFile = {
-      id: `pdf-${crypto.randomUUID()}`,
-      file: new File([], incompleteJobData.pdfFile.name, {
-        lastModified: incompleteJobData.pdfFile.lastModified
-      }),
-      preview: incompleteJobData.pdfFile.preview,
-      metadata: incompleteJobData.pdfFile.metadata,
-      valid: true,
-      errors: []
-    }
-    
-    const restoredCsvFile = {
-      id: `csv-${crypto.randomUUID()}`,
-      file: new File([], incompleteJobData.csvFile.name, {
-        lastModified: incompleteJobData.csvFile.lastModified
-      }),
-      metadata: incompleteJobData.csvFile.metadata,
-      valid: true,
-      errors: []
-    }
-    
-    setPdfFile(restoredPdfFile)
-    setCsvFile(restoredCsvFile)
-    setPdfFields(incompleteJobData.pdfFields)
-    setCsvData(incompleteJobData.csvData)
+    // Set the verified files and data
+    setPdfFile(pdfFile)
+    setCsvFile(csvFile)
+    setPdfFields(pdfFields)
+    setCsvData(csvData)
     setFieldMappings(incompleteJobData.fieldMappings)
     setNamingTemplate(incompleteJobData.namingTemplate)
     
     // Determine which step to go to based on what's actually completed
-    const step1Complete = restoredPdfFile.valid && restoredCsvFile.valid && incompleteJobData.pdfFields.length > 0
+    const step1Complete = pdfFile.valid && csvFile.valid && pdfFields.length > 0
     const step2Complete = incompleteJobData.fieldMappings.length > 0
     const step3Complete = incompleteJobData.namingTemplate?.placeholders?.length > 0 && 
                           incompleteJobData.namingTemplate?.template?.length > 0

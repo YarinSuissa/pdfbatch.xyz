@@ -1,19 +1,14 @@
 // Job storage utilities for managing incomplete jobs via cookies
 import { log } from './logger'
+import { FileWithChecksum } from './checksumUtils'
 
 export interface StoredJobData {
   jobId: string
-  pdfFile: {
-    name: string
-    size: number
-    lastModified: number
+  pdfFile: FileWithChecksum & {
     preview?: string
     metadata?: any
   }
-  csvFile: {
-    name: string
-    size: number
-    lastModified: number
+  csvFile: FileWithChecksum & {
     metadata?: any
   }
   pdfFields: Array<{
