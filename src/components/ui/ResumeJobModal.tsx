@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { useDropzone } from 'react-dropzone'
 import { StoredJobData } from '../../utils/jobStorage'
 import { computeFileChecksum, filesMatch } from '../../utils/checksumUtils'
 import { processUploadedFiles } from '../../utils/fileProcessing'
@@ -78,6 +79,36 @@ export function ResumeJobModal({ jobData, onResume, onStartNew, onClose }: Resum
       handleFileUpload(file, 'csv')
     }
   }, [handleFileUpload])
+
+  const onPdfDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0]
+      setPdfFile(file)
+      handleFileUpload(file, 'pdf')
+    }
+  }, [handleFileUpload])
+
+  const onCsvDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0]
+      setCsvFile(file)
+      handleFileUpload(file, 'csv')
+    }
+  }, [handleFileUpload])
+
+  const { getRootProps: getPdfRootProps, getInputProps: getPdfInputProps, isDragActive: isPdfDragActive } = useDropzone({
+    onDrop: onPdfDrop,
+    accept: { 'application/pdf': ['.pdf'] },
+    maxFiles: 1,
+    noClick: true // We'll handle clicks manually
+  })
+
+  const { getRootProps: getCsvRootProps, getInputProps: getCsvInputProps, isDragActive: isCsvDragActive } = useDropzone({
+    onDrop: onCsvDrop,
+    accept: { 'text/csv': ['.csv'] },
+    maxFiles: 1,
+    noClick: true // We'll handle clicks manually
+  })
 
   const handleResumeWithFiles = async () => {
     if (!pdfFile || !csvFile || pdfState !== 'verified' || csvState !== 'verified') {
@@ -200,7 +231,19 @@ export function ResumeJobModal({ jobData, onResume, onStartNew, onClose }: Resum
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* PDF File Upload */}
-              <div className="border border-gray-200 rounded-lg p-4">
+              <div 
+                {...getPdfRootProps()}
+                className={`border-2 border-dashed rounded-lg p-4 transition-all duration-300 ${
+                  isPdfDragActive 
+                    ? 'border-red-400 bg-red-50' 
+                    : pdfState === 'verified'
+                    ? 'border-green-400 bg-green-50'
+                    : pdfState === 'mismatch' || pdfState === 'error'
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-gray-300 hover:border-red-300 hover:bg-red-50'
+                }`}
+              >
+                <input {...getPdfInputProps()} />
                 <div className="flex items-center mb-3">
                   <FileText className="w-5 h-5 text-red-600 mr-2" />
                   <h4 className="font-semibold text-gray-900">PDF Template</h4>
@@ -212,8 +255,152 @@ export function ResumeJobModal({ jobData, onResume, onStartNew, onClose }: Resum
                     <p><strong>Size:</strong> {formatFileSize(jobData.pdfFile.size)}</p>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="block">
+                  <div className="space-y-3">
+                    {isPdfDragActive ? (
+                      <div className="text-center py-6">
+                        <Upload className="w-8 h-8 mx-auto text-red-600 mb-2" />
+                        <p className="text-red-700 font-medium">Drop PDF file here</p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-2">
+                          Drag and drop your PDF file here, or
+                        </p>
+                        <label className="cursor-pointer">
+                          <span className="text-red-600 hover:text-red-700 font-medium">
+                            choose file to upload
+                          </span>
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handlePdfUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    )}
+                    
+                    <div className={`flex items-start space-x-2 p-3 rounded-lg border ${getStateColor(pdfState)}`}>
+                      {getStateIcon(pdfState)}
+                      <div className="flex-1 text-sm">
+                        {getStateMessage(pdfState, 'PDF')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CSV File Upload */}
+              <div 
+                {...getCsvRootProps()}
+                className={`border-2 border-dashed rounded-lg p-4 transition-all duration-300 ${
+                  isCsvDragActive 
+                    ? 'border-blue-400 bg-blue-50' 
+                    : csvState === 'verified'
+                    ? 'border-green-400 bg-green-50'
+                    : csvState === 'mismatch' || csvState === 'error'
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+              >
+                <input {...getCsvInputProps()} />
+                <div className="flex items-center mb-3">
+                  <Database className="w-5 h-5 text-blue-600 mr-2" />
+                  <h4 className="font-semibold text-gray-900">CSV Data</h4>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-600">
+                    <p><strong>Expected:</strong> {jobData.csvFile.name}</p>
+                    <p><strong>Size:</strong> {formatFileSize(jobData.csvFile.size)}</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {isCsvDragActive ? (
+                      <div className="text-center py-6">
+                        <Upload className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                        <p className="text-blue-700 font-medium">Drop CSV file here</p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-2">
+                          Drag and drop your CSV file here, or
+                        </p>
+                        <label className="cursor-pointer">
+                          <span className="text-blue-600 hover:text-blue-700 font-medium">
+                            choose file to upload
+                          </span>
+                          <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleCsvUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    )}
+                    
+                    <div className={`flex items-start space-x-2 p-3 rounded-lg border ${getStateColor(csvState)}`}>
+                      {getStateIcon(csvState)}
+                      <div className="flex-1 text-sm">
+                        {getStateMessage(csvState, 'CSV')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-red-800 font-medium">Error</h4>
+                  <p className="text-red-700 text-sm mt-1">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleResumeWithFiles}
+              disabled={!canResume}
+              className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 ${
+                canResume
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {processing ? (
+                <RefreshCw className="w-5 h-5 animate-spin" />
+              ) : (
+                <ArrowRight className="w-5 h-5" />
+              )}
+              <span>{processing ? 'Processing...' : 'Resume Job'}</span>
+            </button>
+            <button
+              onClick={onStartNew}
+              className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+            >
+              Start New Job
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500 text-center mt-4">
+            Files are verified using checksums to ensure they match exactly
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
                       <input
                         type="file"
                         accept=".pdf"
