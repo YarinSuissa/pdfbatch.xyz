@@ -403,19 +403,6 @@ export function GenerateStep({
                 <span className="font-medium text-gray-900">{csvData.length} PDF files + ZIP</span>
               </div>
             </div>
-
-            {/* Processing Method Info */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <Package className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-blue-800 font-medium mb-1">Client-Side Processing</h4>
-                  <p className="text-sm text-blue-700">
-                    All PDF generation happens in your browser for optimal performance and no server limits.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {progress.status === 'idle' && (
