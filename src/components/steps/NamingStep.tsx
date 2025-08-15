@@ -185,38 +185,86 @@ export function NamingStep({
 
         {/* Available Placeholders */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          {/* Quick Insert Toolbar */}
+          <div className="bg-white rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Quick Insert
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {availablePlaceholders.slice(0, 4).map((placeholder, index) => (
+                <button
+                  key={index}
+                  onClick={() => insertPlaceholder(placeholder.name)}
+                  className="inline-flex items-center space-x-1 px-3 py-1.5 bg-red-100 text-red-800 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+                >
+                  <span>{placeholder.name}</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              ))}
+              {availablePlaceholders.length > 4 && (
+                <span className="text-sm text-gray-500 px-2 py-1.5">
+                  +{availablePlaceholders.length - 4} more below
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* All Placeholders by Category */}
+          <div className="bg-white rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Available Placeholders
             </h3>
 
-            <div className="space-y-4">
-              {availablePlaceholders.map((placeholder, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{placeholder.name}</h4>
-                    <button
-                      onClick={() => insertPlaceholder(placeholder.name)}
-                      className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors"
-                    >
-                      Insert
-                    </button>
-                  </div>
-                  <div className="text-xs text-gray-500 mb-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      placeholder.type === 'CSV Column' 
-                        ? 'bg-blue-100 text-blue-800'
-                        : placeholder.type === 'PDF Field'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-orange-100 text-orange-800'
-                    }`}>
-                      {placeholder.type}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-600">{placeholder.description}</p>
+            {/* Group placeholders by type */}
+            {[
+              { type: 'CSV Column', items: availablePlaceholders.filter(p => p.type === 'CSV Column'), color: 'blue' },
+              { type: 'PDF Field', items: availablePlaceholders.filter(p => p.type === 'PDF Field'), color: 'green' },
+              { type: 'System', items: availablePlaceholders.filter(p => p.type === 'System'), color: 'orange' }
+            ].filter(group => group.items.length > 0).map((group) => (
+              <div key={group.type} className="mb-6 last:mb-0">
+                <div className="flex items-center mb-3">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    group.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                    group.color === 'green' ? 'bg-green-100 text-green-800' :
+                    'bg-orange-100 text-orange-800'
+                  }`}>
+                    {group.type}
+                  </span>
+                  <span className="ml-2 text-sm text-gray-500">({group.items.length})</span>
                 </div>
-              ))}
-            </div>
+                
+                <div className="grid grid-cols-1 gap-2">
+                  {group.items.map((placeholder, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50 group transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-gray-900 text-sm">
+                            {placeholder.name}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1 truncate">
+                          {placeholder.description}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => insertPlaceholder(placeholder.name)}
+                        className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 group-hover:bg-red-100 group-hover:text-red-800 transition-colors flex-shrink-0"
+                        title="Insert placeholder"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
