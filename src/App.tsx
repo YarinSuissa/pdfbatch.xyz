@@ -170,13 +170,13 @@ function App() {
     setFieldMappings(incompleteJobData.fieldMappings)
     setNamingTemplate(incompleteJobData.namingTemplate)
     
-    // Determine which step to go to based on what's actually completed
+    // Determine which step to resume at based on completion status
     const step1Complete = pdfFile.valid && csvFile.valid && pdfFields.length > 0
-    const step2Complete = incompleteJobData.fieldMappings.length > 0
+    const step2Complete = incompleteJobData.fieldMappings.length === pdfFields.length && incompleteJobData.fieldMappings.length > 0
     const step3Complete = incompleteJobData.namingTemplate?.placeholders?.length > 0 && 
                           incompleteJobData.namingTemplate?.template?.length > 0
     
-    // Find the earliest incomplete step
+    // Resume at the current working step, not the next step
     let targetStep = 1
     let step1Status = false, step2Status = false, step3Status = false, step4Status = false
     
