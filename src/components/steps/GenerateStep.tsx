@@ -516,7 +516,7 @@ export function GenerateStep({
                     <div>
                       <p className="font-medium text-green-800">ZIP Archive Ready</p>
                       <p className="text-sm text-green-600">
-                        Contains {fileCount} PDF files • Expires in 24 hours
+                        Contains {fileCount} PDF files
                       </p>
                     </div>
                   </div>
