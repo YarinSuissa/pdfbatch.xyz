@@ -1,9 +1,3 @@
-Looking through your project, I can see this is PDFBatch.xyz - a privacy-focused web application for batch-generating PDFs from CSV data. Let me create a comprehensive README for you:
-
-<artifacts>
-<artifact identifier="readme-file" type="text/markdown" title="README.md for PDFBatch.xyz">
-# PDFBatch.xyz 📄✨
-
 > Transform your CSV data into personalized PDF documents - all in your browser, completely private.
 
 [![React](https://img.shields.io/badge/React-18.3-blue.svg)](https://reactjs.org/)
