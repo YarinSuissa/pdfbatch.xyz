@@ -25,6 +25,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 function App() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [lastAction, setLastAction] = useState<'files_uploaded' | 'mapping_changed' | 'step2_next' | 'naming_changed' | 'step3_next' | 'generation_started'>('files_uploaded')
   const [steps, setSteps] = useState<WizardStep[]>([
     { id: 1, title: 'Upload Files', description: 'PDF form & CSV data', completed: false, active: true },
     { id: 2, title: 'Map Fields', description: 'Drag & drop mapping', completed: false, active: false },
@@ -63,6 +64,7 @@ function App() {
           
           const jobData: StoredJobData = {
             jobId: `session-${Date.now()}`,
+            lastAction,
             pdfFile: {
               ...pdfWithChecksum,
               preview: pdfFile.preview,
@@ -112,6 +114,13 @@ function App() {
 
   const nextStep = () => {
     if (currentStep < 4 && canProceedToStep(currentStep + 1)) {
+      // Track when user presses "Next" button
+      if (currentStep === 2) {
+        setLastAction('step2_next')
+      } else if (currentStep === 3) {
+        setLastAction('step3_next')
+      }
+      
       updateStepStatus(currentStep, true)
       setCurrentStep(currentStep + 1)
       updateStepStatus(currentStep + 1, false, true)
@@ -136,16 +145,17 @@ function App() {
     setCsvFile(uploadedCsvFile)
     setPdfFields(extractedFields)
     setCsvData(parsedCsvData)
-    
-    // jobId is now managed by App component state
+    setLastAction('files_uploaded')
   }
 
   const handleMappingComplete = (mappings: FieldMapping[]) => {
     setFieldMappings(mappings)
+    setLastAction('mapping_changed')
   }
 
   const handleTemplateComplete = useCallback((template: NamingTemplate) => {
     setNamingTemplate(template)
+    setLastAction('naming_changed')
   }, [])
 
   const handleGenerationComplete = (downloadUrl: string, expiresAt: string) => {
@@ -169,30 +179,74 @@ function App() {
     setCsvData(csvData)
     setFieldMappings(incompleteJobData.fieldMappings)
     setNamingTemplate(incompleteJobData.namingTemplate)
+    setLastAction(incompleteJobData.lastAction)
     
-    // Determine which step to resume at based on completion status
-    const step1Complete = pdfFile.valid && csvFile.valid && pdfFields.length > 0
-    const step2Complete = incompleteJobData.fieldMappings.length === pdfFields.length && incompleteJobData.fieldMappings.length > 0
-    const step3Complete = incompleteJobData.namingTemplate?.placeholders?.length > 0 && 
-                          incompleteJobData.namingTemplate?.template?.length > 0
+    // Determine which step to resume at based on last user action
+    let targetStep: number
+    let step1Status: boolean, step2Status: boolean, step3Status: boolean, step4Status: boolean
     
-    // Resume at the current working step, not the next step
-    let targetStep = 1
-    let step1Status = false, step2Status = false, step3Status = false, step4Status = false
-    
-    if (step1Complete) {
-      step1Status = true
-      targetStep = 2
-      
-      if (step2Complete) {
-        step2Status = true
-        targetStep = 3
+    switch (incompleteJobData.lastAction) {
+      case 'files_uploaded':
+        // User just uploaded files, go to mapping step
+        targetStep = 2
+        step1Status = true
+        step2Status = false
+        step3Status = false
+        step4Status = false
+        break
         
-        if (step3Complete) {
-          step3Status = true
-          targetStep = 4
-        }
-      }
+      case 'mapping_changed':
+        // User was working on mappings, stay on mapping step
+        targetStep = 2
+        step1Status = true
+        step2Status = false
+        step3Status = false
+        step4Status = false
+        break
+        
+      case 'step2_next':
+        // User pressed next from mapping, go to naming step
+        targetStep = 3
+        step1Status = true
+        step2Status = true
+        step3Status = false
+        step4Status = false
+        break
+        
+      case 'naming_changed':
+        // User was working on naming, stay on naming step
+        targetStep = 3
+        step1Status = true
+        step2Status = true
+        step3Status = false
+        step4Status = false
+        break
+        
+      case 'step3_next':
+        // User pressed next from naming, go to generation step
+        targetStep = 4
+        step1Status = true
+        step2Status = true
+        step3Status = true
+        step4Status = false
+        break
+        
+      case 'generation_started':
+        // User was generating, stay on generation step
+        targetStep = 4
+        step1Status = true
+        step2Status = true
+        step3Status = true
+        step4Status = false
+        break
+        
+      default:
+        // Fallback to step 2 if unknown action
+        targetStep = 2
+        step1Status = true
+        step2Status = false
+        step3Status = false
+        step4Status = false
     }
     
     // Set current step and update all step statuses
@@ -218,6 +272,7 @@ function App() {
     setCsvData({ columns: [], data: [] })
     setFieldMappings([])
     setNamingTemplate(null)
+    setLastAction('files_uploaded')
     setCurrentStep(1)
     setSteps([
       { id: 1, title: 'Upload Files', description: 'PDF form & CSV data', completed: false, active: true },
@@ -265,6 +320,7 @@ function App() {
             csvData={csvData.data}
             pdfFile={pdfFile}
             onGenerationComplete={handleGenerationComplete}
+            onGenerationStarted={() => setLastAction('generation_started')}
           />
         ) : null
       default:

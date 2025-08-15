@@ -4,6 +4,7 @@ import { FileWithChecksum } from './checksumUtils'
 
 export interface StoredJobData {
   jobId: string
+  lastAction: 'files_uploaded' | 'mapping_changed' | 'step2_next' | 'naming_changed' | 'step3_next' | 'generation_started'
   pdfFile: FileWithChecksum & {
     preview?: string
     metadata?: any

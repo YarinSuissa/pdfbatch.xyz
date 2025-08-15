@@ -12,6 +12,7 @@ interface GenerateStepProps {
   csvData: Record<string, string>[]
   pdfFile: { file: File }
   onGenerationComplete: (downloadUrl: string, expiresAt: string) => void
+  onGenerationStarted?: () => void
 }
 
 function KoFiNudge({ onClose }: { onClose: () => void }) {
@@ -47,7 +48,8 @@ export function GenerateStep({
   namingTemplate,
   csvData,
   pdfFile,
-  onGenerationComplete
+  onGenerationComplete,
+  onGenerationStarted
 }: GenerateStepProps) {
   const [progress, setProgress] = useState<GenerationProgress>({
     current: 0,
@@ -277,6 +279,9 @@ export function GenerateStep({
   }
 
   const startGeneration = async () => {
+    // Track that generation has started
+    onGenerationStarted?.()
+    
     setProgress({
       current: 0,
       total: csvData.length,
